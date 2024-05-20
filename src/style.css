@@ -1,0 +1,32 @@
+*
+{
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body
+{
+    overflow: hidden;
+}
+
+.webgl
+{
+    position: fixed;
+    top: 0;
+    left: 0;
+    outline: none;
+}
+
+
+@media (max-width: 767px) {
+    .lil-gui {
+        transform: scale(0.8);
+        transform-origin: top right;
+        /* margin: 0; */
+    }
+
+    .lil-gui.autoPlace {
+        right: 0px
+    }
+}
