@@ -15,7 +15,7 @@ import * as dat from 'lil-gui'
  */
 // Debug
 const gui = new dat.GUI();
-// gui.close();
+gui.close();
 
 const params = {
     printCameraPosition: () => {
@@ -25,11 +25,11 @@ const params = {
         alert(`Width: ${window.screen.width}, Height: ${window.screen.height}`);
     },
     color: 0xffffff,
-    color_directionalLight: 0x00fffc,
-    skyColor: 0xff0000,
-    groundColor: 0x0000ff,
+    color_directionalLight: 0xfee4a8,
+    skyColor: 0x0061fe,
+    groundColor: 0x669d34,
     color_pointLight: 0xff9000,
-    color_rectAreaLight: 0x4e00ff,
+    color_rectAreaLight: 0x5e30eb,
     color_spotLight: 0x78ff00
 };
 
@@ -37,7 +37,7 @@ const params = {
 // MULTIPLIERS
 const m = {
     x: 21.6,
-    y: 6.6,
+    y: 6.6 + 3.3,
     z: 19.6
 }
 
@@ -49,13 +49,13 @@ const canvas = document.querySelector('canvas.webgl')
 
 // Scene
 const scene = new THREE.Scene()
-
+scene.background = new THREE.Color(0xDED7D3)
 
 // MATERIAL
 const material = new THREE.MeshStandardMaterial()
 material.roughness = 0.4
-gui.add(material, 'roughness', 0, 1, 0.01).name('Roughness');
-gui.add(material, 'wireframe');
+// gui.add(material, 'roughness', 0, 1, 0.01).name('Roughness');
+// gui.add(material, 'wireframe');
 
 // OBJECTS
 const loader = new GLTFLoader();
@@ -69,13 +69,28 @@ loader.load( 'villa-savoye.glb', function ( gltf ) {
        console.log(object.children[0].children[1].material.transparent = true);
        
        object.traverse((child) => {
-        if (child.isMesh) {
+        console.log(child);
+        // console.log(child.castShadow);
+        // child.castShadow = true;
+        // child.receiveShadow = true;
+        // console.log(child.castShadow);
+        
+        if (child.children.isMesh) {
+            
+            // child.castShadow = true;
+            // child.receiveShadow = true;
+            // child.receiveShadow = true;
             // Set the material to be transparent
             // console.log(child.material);
             
             // child.material.transparent = true;
             // child.material.opacity = 0.5; // Adjust opacity as needed
         }
+
+        object.position.y = 3.3;
+        // object.castShadow = true;
+        // plane.receiveShadow = true;
+        adjustCameraPosition();
     });
 
 	scene.add(object);
@@ -86,19 +101,33 @@ loader.load( 'villa-savoye.glb', function ( gltf ) {
 
 } );
 
-const cube = new THREE.Mesh(
-    new THREE.BoxGeometry(5, 1, 5),
-    material
-)
+   // Adjust camera position based on screen size
+   function adjustCameraPosition() {
+    if (window.innerWidth <= 768) { // Assuming 768px as the breakpoint for mobile devices
+        camera.position.set(0, 0.5, 38); // Zoom in for mobile
+    } else {
+        // camera.position.set(5, 5, 10); // Zoom out for larger screens
+        camera.position.set(0, -0.2, 27);
+    }
+    camera.lookAt(scene.position); // Ensure the camera looks at the center of the scene
+    controls.update(); // Update controls
+}
+
+
+// const cube = new THREE.Mesh(
+//     new THREE.BoxGeometry(5, 1, 5),
+//     material
+// )
 
 const plane = new THREE.Mesh(
-    new THREE.PlaneGeometry(5, 5),
+    new THREE.PlaneGeometry(25, 25),
     material
 )
 plane.rotation.x = -Math.PI * 0.5
-plane.position.y = -0.65
+plane.position.y = 0;
+// plane.receiveShadow = true;
 
-scene.add(cube, plane)
+scene.add(plane)
 const axesHelper = new THREE.AxesHelper(m.x * 1.5);
 scene.add(axesHelper);
 
@@ -120,6 +149,7 @@ ambientLightFolder.close();
 const hemisphereLight = new THREE.HemisphereLight(0x0061fe, 0x669d34, 0);
 const hemisphereLightHelper = new THREE.HemisphereLightHelper(hemisphereLight, 0.1 * m.y);
 scene.add(hemisphereLight, hemisphereLightHelper);
+hemisphereLightHelper.visible = false;
 
 const hemisphereLightFolder = gui.addFolder('Hemisphere Light');
 hemisphereLightFolder.addColor(params, 'skyColor').onChange(() => {
@@ -138,8 +168,10 @@ hemisphereLightFolder.close();
 // $$DirectionalLight
 const directionalLight = new THREE.DirectionalLight(0xfee4a8, 0.85);
 directionalLight.position.set(0.85 * m.x, 2.15 * m.y, 0.35 * m.z);
+// directionalLight.castShadow = true;
 
 const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 0.1 * m.y);
+directionalLightHelper.visible = false;
 
 scene.add(directionalLight, directionalLightHelper);
 
@@ -159,8 +191,11 @@ directionalLightFolder.close();
 const pointLight = new THREE.PointLight(0xff9000, 0.5)
 // pointLight.position.set(1 * m.x, -0.5 * m.y, 1 * m.z);
 pointLight.position.set(-3.45, -2.7, 8.28);
+// pointLight.castShadow = true;
+
 
 const pointLightHelper = new THREE.PointLightHelper(pointLight, 0.1 * m.y);
+pointLightHelper.visible = false;
 scene.add(pointLight, pointLightHelper);
 
 
@@ -182,10 +217,11 @@ pointLightFolder.close();
 // $$Rect Area Light
 const rectAreaLight = new THREE.RectAreaLight(0x5e30eb, 0.8, 19.7, 1);
 // rectAreaLight.position.set(0 * m.x, 0 * m.y, 1.5 * m.z);
-rectAreaLight.position.set(0.1, 1.2, 11.5);
+rectAreaLight.position.set(0.1, 1.2+3.3, 11.5);
 rectAreaLight.lookAt(new THREE.Vector3());
 
 const rectAreaLightHelper = new RectAreaLightHelper(rectAreaLight);
+rectAreaLightHelper.visible = false
 scene.add(rectAreaLight, rectAreaLightHelper);
 
 const rectAreaLightFolder = gui.addFolder('Rect Area Light');
@@ -203,27 +239,30 @@ rectAreaLightFolder.close();
 
 
 // $$Spot Light
-const spotLight = new THREE.SpotLight(0x78ff00, 0.5, 10, 0.1, 0.25, 1);
-spotLight.position.set(0 * m.x, 2 * m.y, 3 * m.z);
-spotLight.target.position.set(0 * m.x, 1 * m.y, 1.5 * m.z);
-const spotLightHelper = new THREE.SpotLightHelper(spotLight, 0xffffff);
-scene.add(spotLight, spotLight.target, spotLightHelper);
+// const spotLight = new THREE.SpotLight(0x78ff00, 0.5, 10, 0.1, 0.5, 1);
+// // spotLight.position.set(0 * m.x, 2 * m.y, 3 * m.z);
+// spotLight.position.set(-1, 6.5, 19.3);
+// // spotLight.position.set(2.1, 7, 20.7);
+// // spotLight.target.position.set(0 * m.x, 1 * m.y, 1.5 * m.z);
+// spotLight.target.position.set(-1, 6.5, 19.3);
+// const spotLightHelper = new THREE.SpotLightHelper(spotLight, 0xffffff);
+// scene.add(spotLight, spotLight.target, spotLightHelper);
 
-const spotLightFolder = gui.addFolder('Spot Light');
-spotLightFolder.add(spotLight, 'intensity', 0, 1, 0.01);
-spotLightFolder.addColor(params, 'color_spotLight').onChange(() => {
-    spotLight.color.set(params.color_spotLight);
-}).name('color');
-spotLightFolder.add(spotLight, 'distance', 1, 20, 0.1);
-spotLightFolder.add(spotLight, 'angle', 0, Math.PI * 0.25, 0.1);
-spotLightFolder.add(spotLight, 'penumbra', 0, 1, 0.01);
-spotLightFolder.add(spotLight, 'decay', 0, 1, 0.1);
-spotLightFolder.add(spotLight.position, 'x', -3 * m.x, 3 * m.x, 0.1);
-spotLightFolder.add(spotLight.position, 'y', -3 * m.y, 3 * m.y, 0.1);
-spotLightFolder.add(spotLight.position, 'z', -3 * m.z, 3 * m.z, 0.1);
-spotLightFolder.add(spotLightHelper, 'visible');
-spotLightFolder.close();
-// console.log(spotLight.target);
+// const spotLightFolder = gui.addFolder('Spot Light');
+// spotLightFolder.add(spotLight, 'intensity', 0, 1, 0.01);
+// spotLightFolder.addColor(params, 'color_spotLight').onChange(() => {
+//     spotLight.color.set(params.color_spotLight);
+// }).name('color');
+// spotLightFolder.add(spotLight, 'distance', 1, 20, 0.1);
+// spotLightFolder.add(spotLight, 'angle', 0, Math.PI * 0.25, 0.1);
+// spotLightFolder.add(spotLight, 'penumbra', 0, 1, 0.01);
+// spotLightFolder.add(spotLight, 'decay', 0, 1, 0.1);
+// spotLightFolder.add(spotLight.position, 'x', -3 * m.x, 3 * m.x, 0.1);
+// spotLightFolder.add(spotLight.position, 'y', -3 * m.y, 3 * m.y, 0.1);
+// spotLightFolder.add(spotLight.position, 'z', -3 * m.z, 3 * m.z, 0.1);
+// spotLightFolder.add(spotLightHelper, 'visible');
+// spotLightFolder.close();
+// // console.log(spotLight.target);
 
 
 /**
@@ -231,6 +270,7 @@ spotLightFolder.close();
  */
 const sizes = {
     width: window.innerWidth,
+    // height: window.innerHeight
     height: window.innerHeight
 }
 
@@ -253,12 +293,6 @@ window.addEventListener('resize', () => {
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-// camera.position.x = 1
-// camera.position.y = 1
-// camera.position.z = 2
-camera.position.x = 0;
-camera.position.y = -0.2;
-camera.position.z = m.x * 1.25;
 scene.add(camera)
 
 // Controls
@@ -272,7 +306,8 @@ const renderer = new THREE.WebGLRenderer({
     canvas: canvas
 })
 renderer.setSize(sizes.width, sizes.height)
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+// renderer.shadowMap.enabled = true;
 
 /**
  * Animate

@@ -2,12 +2,14 @@
 {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 html,
 body
 {
     overflow: hidden;
+    background-color: black;
 }
 
 .webgl
@@ -19,6 +21,49 @@ body
 }
 
 
+.notes {
+    width: 100vw;
+    height: 40vh;
+    pointer-events: none;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    padding: 1rem 2rem;
+    /* color: #1E1E1F; */
+    color: #485562;
+    /* background-color: green; */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 80%;
+    /* opacity: .3; */
+    z-index: 1;
+}
+
+.notes h1 {
+    margin-bottom: 1rem;
+}
+
+.notes p {
+    opacity: .8;
+    /* color: #485562; */
+    text-align: justify;
+}
+
+.footer {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* z-index: 2; */
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #b4aea2;
+    font-size: 80%;
+}
+
+
+.lil-gui {
+    --title-background-color: #485562;
+}
+
 @media (max-width: 767px) {
     .lil-gui {
         transform: scale(0.8);
@@ -26,7 +71,12 @@ body
         /* margin: 0; */
     }
 
+    .notes {
+        height: 45vh;
+    }
+
     .lil-gui.autoPlace {
         right: 0px
     }
 }
+
